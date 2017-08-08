@@ -13,7 +13,4 @@ class Home extends Component {
   }
 };
 
-// const mapStateToProps = (state, ownProps) => {};
-// const mapDispatchToProps = (dispatch, ownProps) => {};
-
 export default connect()(Home);

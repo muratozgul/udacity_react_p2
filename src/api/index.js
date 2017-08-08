@@ -1,10 +1,14 @@
-const DEFAULT_SERVER_URL = 'http://localhost:5001';
-const DEFAULT_HEADERS = { 'Authorization': 'whatever-you-want' };
+import { DEFAULT_SERVER_URL, DEFAULT_HEADERS } from './config';
+import { getImageUrl } from './avatars';
 
 const API = {};
 
 export const initializeAPI = (url = DEFAULT_SERVER_URL, options = {}) => {
   const headers = options.headers || DEFAULT_HEADERS;
+
+  API.getImageUrl = (userId) => {
+    return getImageUrl(userId);
+  };
 
   API.getAllPosts = () => {
     return fetch(`${url}/posts`, { headers })
