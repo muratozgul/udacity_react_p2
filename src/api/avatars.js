@@ -1,5 +1,4 @@
-import { DEFAULT_SERVER_URL } from './config';
-const IMAGES_FOLDER = 'avatar';
+const IMAGES_FOLDER = 'avatar/small';
 const IMAGE_NAMES = [
 'ade.jpg',
 'chris.jpg',
@@ -28,7 +27,7 @@ const IMAGE_NAMES = [
 ];
 
 const imageLinks = IMAGE_NAMES.map(name => {
-  return `${process.env.PUBLIC_URL}/${IMAGES_FOLDER}/small/${name}`;
+  return [process.env.PUBLIC_URL, IMAGES_FOLDER, name].join('/');
 });
 
 const getHash = (input) => {
@@ -43,11 +42,8 @@ const getHash = (input) => {
   return hash;
 }
 
-export const getImageUrl = (hash) => {
-  // Convert to 32bit integer and take mod
-  console.log('hash to 32int', hash, getHash(hash + '123'));
-  const index = getHash(hash) % imageLinks.length;
-  console.log('index', hash, index);
-  console.log('images:', imageLinks.length);
+export const getImageUrl = (username) => {
+  // Assign a random avatar picture to a user
+  const index = getHash(username) % imageLinks.length;
   return imageLinks[index];
 };

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { getAllPosts } from '../redux/postStore';
+import { Container } from 'semantic-ui-react';
 import PostList from './PostList';
 
 class Home extends Component {
@@ -9,7 +10,7 @@ class Home extends Component {
   }
 
   render() {
-    return <PostList />;
+    return <Container><PostList /></Container>;
   }
 };
 

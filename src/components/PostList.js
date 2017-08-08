@@ -2,16 +2,23 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
+import { Grid } from 'semantic-ui-react';
 import Post from './Post';
 
 class PostList extends Component {
   render() {
     const { posts } = this.props;
     const postComponents = posts.map(post => {
-      return <Post key={post.id} id={post.id} />;
+      return (
+        <Grid.Row key={post.id}>
+          <Grid.Column>
+            <Post id={post.id} />
+          </Grid.Column>
+        </Grid.Row>
+      );
     });
 
-    return <div>{postComponents}</div>;
+    return <Grid columns={1}>{postComponents}</Grid>;
   }
 };
 
