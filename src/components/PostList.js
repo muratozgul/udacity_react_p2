@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
-import { Grid } from 'semantic-ui-react';
+import { Grid, Item } from 'semantic-ui-react';
 import Post from './Post';
 
 class PostList extends Component {

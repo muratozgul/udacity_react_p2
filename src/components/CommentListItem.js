@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import moment from 'moment';
 import { Comment } from 'semantic-ui-react';
+import VoteBox from './VoteBox';
 
 class CommentListItem extends Component {
   render() {
@@ -16,6 +17,11 @@ class CommentListItem extends Component {
             <div>{moment(timestamp).fromNow()}</div>
           </Comment.Metadata>
           <Comment.Text>{body}</Comment.Text>
+          <Comment.Actions>
+            <Comment.Action>
+              <VoteBox id={id} type={'comment'} />
+            </Comment.Action>
+          </Comment.Actions>
         </Comment.Content>
       </Comment>
     );

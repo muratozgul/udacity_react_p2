@@ -3,27 +3,25 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import moment from 'moment';
 import VisibilitySensor from 'react-visibility-sensor';
-import { Card } from 'semantic-ui-react';
+import { Card, Image } from 'semantic-ui-react';
 import CommentList from './CommentList';
+import { getImageUrl } from '../api/avatars';
 
 class Post extends Component {
   render() {
     const {
-      id, timestamp, title, body, author, category, voteScore, comments
+      id, timestamp, title, body, author, category, voteScore, thumb
     } = this.props;
 
     return (
       <Card fluid>
         <Card.Content>
+          <Image floated='left' size='mini' src={getImageUrl(author)} />
           <Card.Header>{title}</Card.Header>
           <Card.Meta>Posted {moment(timestamp).fromNow()}</Card.Meta>
           <Card.Description>{body}</Card.Description>
         </Card.Content>
         <Card.Content extra style={{ paddingTop: 0, paddingBottom: 0 }}>
-          <VisibilitySensor
-            active={comments == null}
-            onChange={this.loadComments}
-          />
           <div style={{ minHeight: '34px' }}>
             <CommentList postId={id} />
           </div>
@@ -40,7 +38,8 @@ Post.propTypes = {
   body: PropTypes.string.isRequired,
   author: PropTypes.string.isRequired,
   category: PropTypes.string,
-  voteScore: PropTypes.number
+  voteScore: PropTypes.number,
+  thumb: PropTypes.string
 };
 
 PropTypes.defaultProps = {

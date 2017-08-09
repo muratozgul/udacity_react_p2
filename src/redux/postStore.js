@@ -35,6 +35,12 @@ export const getAllPosts = () => {
   return (dispatch, getState) => {
     dispatch({ type: actions.PROMISE_GET_ALL });
     return API.getAllPosts()
+      .then(posts => {
+        return posts.map(post => ({
+          ...post,
+          thumb: API.getImageUrl(post.author)
+        }));
+      })
       .then(posts => dispatch({ type: actions.RESOLVE_GET_ALL, posts }))
       .catch(error => dispatch({ type: actions.REJECT_GET_ALL, error }));
   };
