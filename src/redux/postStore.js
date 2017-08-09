@@ -18,7 +18,7 @@ import { createActions } from './utils';
 /******************************************************************************/
 const nameSpace = 'POST';
 const actions = createActions([
-  'UP_VOTE', 'DOWN_VOTE',
+  'UP_VOTE', 'DOWN_VOTE', 'SET_VOTE',
   'PROMISE_GET_ALL', 'RESOLVE_GET_ALL', 'REJECT_GET_ALL'
 ], nameSpace);
 
@@ -46,6 +46,32 @@ export const getAllPosts = () => {
   };
 };
 
+export const upVotePost = (postId) => {
+  return (dispatch, getState) => {
+    dispatch({ type: actions.UP_VOTE, postId, animation: true });
+    return API.upVotePost(postId)
+      .then(res => {
+        dispatch({ type: actions.SET_VOTE, postId, value: res.voteScore });
+      })
+      .catch(error => {
+        dispatch({ type: actions.DOWN_VOTE, postId });
+      });
+  };
+};
+
+export const downVotePost = (postId) => {
+  return (dispatch, getState) => {
+    dispatch({ type: actions.DOWN_VOTE, postId, animation: true });
+    return API.downVotePost(postId)
+      .then(res => {
+        dispatch({ type: actions.SET_VOTE, postId, value: res.voteScore });
+      })
+      .catch(error => {
+        dispatch({ type: actions.UP_VOTE, postId });
+      });
+  };
+};
+
 /******************************************************************************/
 // Action Handlers
 /******************************************************************************/
@@ -67,11 +93,24 @@ const handleRejectGetAll = (state, action) => {
   return { ...state, error, loading: false };
 };
 
-const handleVote = (state, action, change) => {
+const handleSetVote = (state, action, value) => {
   const { postId } = action;
-  if (_.isObject(state.postId)) {
-    const post = state[postId];
-    const newPost = { ...post, vote: post.vote + change };
+  const newScore = value || action.value;
+  const post = state.posts[postId];
+  if (_.isObject(post) && _.isNumber(newScore)) {
+    const newPost = { ...post, voteScore: newScore };
+    return { ...state, posts: { ...state.posts, [postId]: newPost } };
+  } else {
+    return state;
+  }
+};
+
+const handleUpDownVote = (state, action, change) => {
+  const { postId } = action;
+  const post = state.posts[postId];
+  const scoreChange = change || action.change;
+  if (_.isObject(post) && _.isNumber(scoreChange)) {
+    const newPost = { ...post, voteScore: post.voteScore + scoreChange };
     return { ...state, posts: { ...state.posts, [postId]: newPost } };
   } else {
     return state;
@@ -84,9 +123,11 @@ const handleVote = (state, action, change) => {
 const postReducer = (state = initialState, action) => {
   switch (action.type) {
     case actions.UP_VOTE:
-      return handleVote(state, action, 1);
+      return handleUpDownVote(state, action, 1);
     case actions.DOWN_VOTE:
-      return handleVote(state, action, -1);
+      return handleUpDownVote(state, action, -1);
+    case actions.SET_VOTE:
+      return handleSetVote(state, action);
     case actions.PROMISE_GET_ALL:
       return handlePromiseGetAll(state, action);
     case actions.RESOLVE_GET_ALL:

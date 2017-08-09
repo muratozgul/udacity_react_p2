@@ -28,7 +28,7 @@ class CommentList extends Component {
           {
             num <= 0
             ? null
-            : <Comment.Group>
+            : <Comment.Group style={{ marginBottom: '10px'}}>
               {
                 commentIdsArray.map(commentId => {
                   return <CommentListItem key={commentId} id={commentId} />

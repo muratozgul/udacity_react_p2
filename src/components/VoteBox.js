@@ -1,38 +1,68 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import _ from 'lodash';
 import { connect } from 'react-redux';
-import { Button, Icon } from 'semantic-ui-react';
+import { Button, Icon, Comment } from 'semantic-ui-react';
+import { upVoteComment, downVoteComment } from '../redux/commentStore';
+import { upVotePost, downVotePost } from '../redux/postStore';
+
+const VOTE_INTERVAL_MS = 500;
 
 class VoteBox extends Component {
-  handleUpVote = () => {
-    console.log('upvote');
+  constructor(props) {
+    super(props);
+    this.handleUpVote = _.throttle(
+      this._handleUpVote, VOTE_INTERVAL_MS, { trailing: false }
+    );
+    this.handleDownVote = _.throttle(
+      this._handleDownVote, VOTE_INTERVAL_MS, { trailing: false }
+    );
   }
 
-  handleDownVote = () => {
-    console.log('downvote');
+  _handleUpVote = () => {
+    const { id, type, dispatch } = this.props;
+    const isComment = type === 'comment';
+    if (isComment) {
+      dispatch(upVoteComment(id));
+    } else {
+      dispatch(upVotePost(id));
+    }
+  }
+
+  _handleDownVote = () => {
+    const { id, type, dispatch } = this.props;
+    const isComment = type === 'comment';
+    if (isComment) {
+      dispatch(downVoteComment(id));
+    } else {
+      dispatch(downVotePost(id));
+    }
   }
 
   render() {
     const { id, type } = this.props;
+    const isComment = type === 'comment';
+    const style = isComment ? null : { display: 'inline-block' };
     return (
-      <div>
-        <Icon name='like outline' size='large'
-          color='blue' className='like'
-          disabled={false} onClick={this.handleUpVote}
-        />
-        <Icon name='dislike outline' size='large'
-          color='blue' className='like'
-          disabled={false} onClick={this.handleDownVote}
-        />
+      <div style={style}>
+        <Comment.Action onClick={this.handleUpVote}>
+          <Icon name='like outline'
+            style={{ transitionProperty: 'none' }}
+            color={'green'}
+          />
+          {isComment ? 'Like' : null}
+        </Comment.Action>
+        <Comment.Action onClick={this.handleDownVote}>
+          <Icon name='dislike outline'
+            style={{ transitionProperty: 'none' }}
+            className={'like'}
+            color={'red'}
+          />
+          {isComment ? 'Dislike' : null}
+        </Comment.Action>
       </div>
     );
   }
-
-  // {/* <Button.Group size='mini' compact>
-  //   <Button>One</Button>
-  //   <Button.Or />
-  //   <Button>Three</Button>
-  // </Button.Group> */}
 };
 
 VoteBox.propTypes = {

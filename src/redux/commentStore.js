@@ -20,7 +20,7 @@ import { createActions } from './utils';
 /******************************************************************************/
 const nameSpace = 'COMMENT';
 const actions = createActions([
-  'UP_VOTE', 'DOWN_VOTE',
+  'UP_VOTE', 'DOWN_VOTE', 'SET_VOTE',
   'PROMISE_GET', 'RESOLVE_GET', 'REJECT_GET'
 ], nameSpace);
 
@@ -44,6 +44,32 @@ export const getCommentsForPost = (postId) => {
       })
       .then(comments => dispatch({ type: actions.RESOLVE_GET, postId, comments }))
       .catch(error => dispatch({ type: actions.REJECT_GET, postId, error }));
+  };
+};
+
+export const upVoteComment = (commentId) => {
+  return (dispatch, getState) => {
+    dispatch({ type: actions.UP_VOTE, commentId, animation: true });
+    return API.upVoteComment(commentId)
+      .then(res => {
+        dispatch({ type: actions.SET_VOTE, commentId, value: res.voteScore });
+      })
+      .catch(error => {
+        dispatch({ type: actions.DOWN_VOTE, commentId });
+      });
+  };
+};
+
+export const downVoteComment = (commentId) => {
+  return (dispatch, getState) => {
+    dispatch({ type: actions.DOWN_VOTE, commentId, animation: true });
+    return API.downVoteComment(commentId)
+      .then(res => {
+        dispatch({ type: actions.SET_VOTE, commentId, value: res.voteScore });
+      })
+      .catch(error => {
+        dispatch({ type: actions.UP_VOTE, commentId });
+      });
   };
 };
 
@@ -91,11 +117,24 @@ const handleRejectGet = (state, action) => {
   };
 };
 
-const handleVote = (state, action, change) => {
+const handleSetVote = (state, action, value) => {
   const { commentId } = action;
-  if (_.isObject(state.comments.commentId)) {
-    const comment = state[commentId];
-    const newComment = { ...comment, vote: comment.vote + change };
+  const newScore = value || action.value;
+  const comment = state.comments[commentId];
+  if (_.isObject(comment) && _.isNumber(newScore)) {
+    const newComment = { ...comment, voteScore: newScore };
+    return { ...state, comments: { ...state.comments, [commentId]: newComment } };
+  } else {
+    return state;
+  }
+};
+
+const handleUpDownVote = (state, action, change) => {
+  const { commentId } = action;
+  const comment = state.comments[commentId];
+  const scoreChange = change || action.change;
+  if (_.isObject(comment) && _.isNumber(scoreChange)) {
+    const newComment = { ...comment, voteScore: comment.voteScore + scoreChange };
     return { ...state, comments: { ...state.comments, [commentId]: newComment } };
   } else {
     return state;
@@ -108,9 +147,11 @@ const handleVote = (state, action, change) => {
 const commentReducer = (state = initialState, action) => {
   switch (action.type) {
     case actions.UP_VOTE:
-      return handleVote(state, action, 1);
+      return handleUpDownVote(state, action, 1);
     case actions.DOWN_VOTE:
-      return handleVote(state, action, -1);
+      return handleUpDownVote(state, action, -1);
+    case actions.SET_VOTE:
+      return handleSetVote(state, action);
     case actions.PROMISE_GET:
       return handlePromiseGet(state, action);
     case actions.RESOLVE_GET:

@@ -20,6 +20,42 @@ export const initializeAPI = (url = DEFAULT_SERVER_URL, options = {}) => {
       .then(res => res.json());
   };
 
+  const voteComment = (commentId, option) => {
+    const options = {
+      method: 'POST',
+      headers: { ...headers, 'content-type': 'application/json' },
+      body: JSON.stringify({ option })
+    };
+    return fetch(`${url}/comments/${commentId}`, options)
+      .then(res => res.json());
+  };
+
+  API.upVoteComment = (commentId) => {
+    return voteComment(commentId, 'upVote');
+  };
+
+  API.downVoteComment = (commentId) => {
+    return voteComment(commentId, 'downVote');
+  };
+
+  const votePost = (postId, option) => {
+    const options = {
+      method: 'POST',
+      headers: { ...headers, 'content-type': 'application/json' },
+      body: JSON.stringify({ option })
+    };
+    return fetch(`${url}/posts/${postId}`, options)
+      .then(res => res.json());
+  };
+
+  API.upVotePost = (commentId) => {
+    return votePost(commentId, 'upVote');
+  };
+
+  API.downVotePost = (commentId) => {
+    return votePost(commentId, 'downVote');
+  };
+
   Object.freeze(API);
 };
 
