@@ -10,6 +10,11 @@ export const initializeAPI = (url = DEFAULT_SERVER_URL, options = {}) => {
     return getImageUrl(userId);
   };
 
+  API.getAllCategories = () => {
+    return fetch(`${url}/categories`, { headers })
+      .then(res => res.json());
+  };
+
   API.getAllPosts = () => {
     return fetch(`${url}/posts`, { headers })
       .then(res => res.json());

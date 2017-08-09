@@ -1,23 +1,60 @@
-// import React, { Component } from 'react';
-// import { withRouter } from 'react-router-dom'
-// import { Menu, Segment } from 'semantic-ui-react';
-// import { connect } from 'react-redux';
-//
-// class NavBar extends Component {
-//   // {/* <Link to='/search'>Add a book</Link> */}
-//   handleItemClick = (e, { name }) => {
-//     this.props.history.push('/new-location');
-//   }
-//
-//   render() {
-//     return (
-//       <Menu pointing secondary>
-//         <Menu.Item name='home' active={activeItem === 'home'} onClick={this.handleItemClick} />
-//         <Menu.Item name='messages' active={activeItem === 'messages'} onClick={this.handleItemClick} />
-//         <Menu.Item name='friends' active={activeItem === 'friends'} onClick={this.handleItemClick} />
-//       </Menu>
-//     );
-//   }
-// };
-//
-// export default withRouter(NavBar);
+import React, { Component } from 'react';
+import { withRouter } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import _ from 'lodash';
+import { Menu, Icon } from 'semantic-ui-react';
+import { connect } from 'react-redux';
+
+class NavBar extends Component {
+  handleItemClick = (e, { name }) => {
+    if (this.props.pathNames.indexOf(name) > -1) {
+      this.props.history.push(`/${name}`);
+    } else {
+      this.props.history.push('/');
+    }
+  }
+
+  renderMenuItem(pathName, currentPath) {
+    return (
+      <Menu.Item name={pathName} key={pathName}
+        active={pathName === currentPath}
+        onClick={this.handleItemClick}
+      />
+    );
+  }
+
+  render() {
+    const { pathNames } = this.props;
+    const currentPath = _.get(this.props, 'match.params.category', '/');
+
+    return (
+      <Menu pointing secondary>
+        <Menu.Item icon='home' name={'home'} key={'home'}
+          active={'/' === currentPath}
+          onClick={this.handleItemClick}
+        />
+        {
+          pathNames.map(pathName => {
+            return this.renderMenuItem(pathName, currentPath);
+          })
+        }
+      </Menu>
+    );
+  }
+};
+
+NavBar.propTypes = {
+  pathNames: PropTypes.arrayOf(PropTypes.string)
+};
+
+NavBar.defaultProps = {
+  pathNames: []
+};
+
+const mapStateToProps = (state, ownProps) => {
+  return {
+    pathNames: state.category.categories
+  };
+};
+
+export default withRouter(connect(mapStateToProps)(NavBar));

@@ -11,13 +11,14 @@ initializeAPI();
 const store = initializeStore();
 
 class App extends Component {
-  // http://redux.js.org/docs/advanced/UsageWithReactRouter.html
+  // @see http://redux.js.org/docs/advanced/UsageWithReactRouter.html
   render() {
     return (
       <Provider store={store}>
         <BrowserRouter>
-          <div className="app">
-            <Route exact path="/" component={Home} />
+          <div className='app'>
+            <Route exact path='/' component={Home} />
+            <Route path='/:category' component={Home} />
           </div>
         </BrowserRouter>
       </Provider>
