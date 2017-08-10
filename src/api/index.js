@@ -1,3 +1,4 @@
+import uuid from 'uuid/v1';
 import { DEFAULT_SERVER_URL, DEFAULT_HEADERS } from './config';
 import { getImageUrl } from './avatars';
 
@@ -24,6 +25,24 @@ export const initializeAPI = (url = DEFAULT_SERVER_URL, options = {}) => {
     return fetch(`${url}/posts/${postId}/comments`, { headers })
       .then(res => res.json());
   };
+
+  API.postComment = (postData) => {
+    const post = {
+      id: uuid(),
+      timestamp: Date.now(),
+      title: postData.title,
+      body: postData.body,
+      author: postData.author,
+      category: postData.category
+    };
+    const options = {
+      method: 'POST',
+      headers: { ...headers, 'content-type': 'application/json' },
+      body: JSON.stringify(post)
+    };
+    return fetch(`${url}/posts`, options)
+      .then(res => res.json());
+  }
 
   const voteComment = (commentId, option) => {
     const options = {

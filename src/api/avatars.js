@@ -45,5 +45,5 @@ const getHash = (input) => {
 export const getImageUrl = (username) => {
   // Assign a random avatar picture to a user
   const index = getHash(username) % imageLinks.length;
-  return imageLinks[index];
+  return imageLinks[Math.abs(index)];
 };

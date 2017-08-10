@@ -5,6 +5,7 @@ import _ from 'lodash';
 import { Menu, Icon, Dropdown } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import { sortPosts } from '../redux/postStore';
+import { openForm } from '../redux/postFormStore';
 
 class NavBar extends Component {
   constructor(props) {
@@ -19,6 +20,10 @@ class NavBar extends Component {
 
   handleSort = (field, order) => {
     this.props.dispatch(sortPosts(field, order));
+  };
+
+  handleNewPost = () => {
+    this.props.dispatch(openForm());
   };
 
   handleItemClick = (e, { name }) => {
@@ -42,23 +47,23 @@ class NavBar extends Component {
     const { sortBy, sortOrder } = this.props;
 
     return (
-      <Menu.Menu position='right'>
-        <Dropdown item position='right' text='Sort'>
-          <Dropdown.Menu>
-            {
-              this.sortOptions.map(option => {
-                const { field, order, text } = option;
-                const isSelected = (field === sortBy) && (order === sortOrder);
-                return (
-                  <Dropdown.Item onClick={() => this.handleSort(field, order)}>
-                    { isSelected ? <b>{text}</b> : text }
-                  </Dropdown.Item>
-                );
-              })
-            }
-          </Dropdown.Menu>
-        </Dropdown>
-      </Menu.Menu>
+      <Dropdown item text='Sort'>
+        <Dropdown.Menu>
+          {
+            this.sortOptions.map(option => {
+              const { field, order, text } = option;
+              const isSelected = (field === sortBy) && (order === sortOrder);
+              return (
+                <Dropdown.Item key={`${field}-${order}`}
+                  onClick={() => this.handleSort(field, order)}
+                >
+                  { isSelected ? <b>{text}</b> : text }
+                </Dropdown.Item>
+              );
+            })
+          }
+        </Dropdown.Menu>
+      </Dropdown>
     );
   }
 
@@ -77,7 +82,10 @@ class NavBar extends Component {
             return this.renderMenuItem(pathName, currentPath);
           })
         }
-        {this.renderSortDropdown()}
+        <Menu.Menu position='right'>
+          <Menu.Item name={'newPost'} onClick={this.handleNewPost} />
+          {this.renderSortDropdown()}
+        </Menu.Menu>
       </Menu>
     );
   }

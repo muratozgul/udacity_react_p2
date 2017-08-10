@@ -4,6 +4,7 @@ import { getAllPosts } from '../redux/postStore';
 import { getAllCategories } from '../redux/categoryStore';
 import { Container } from 'semantic-ui-react';
 import NavBar from './NavBar';
+import PostForm from './PostForm';
 import _ from 'lodash';
 import PostList from './PostList';
 
@@ -20,6 +21,7 @@ class Home extends Component {
       <Container>
         <NavBar />
         <PostList category={category} />
+        <PostForm />
       </Container>
     );
   }
