@@ -2,10 +2,25 @@ import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
-import { Menu, Icon } from 'semantic-ui-react';
+import { Menu, Icon, Dropdown } from 'semantic-ui-react';
 import { connect } from 'react-redux';
+import { sortPosts } from '../redux/postStore';
 
 class NavBar extends Component {
+  constructor(props) {
+    super(props);
+    this.sortOptions = [
+      { field: 'voteScore', order: 'desc', text: 'Score: High to Low' },
+      { field: 'voteScore', order: 'asc', text: 'Score: Low to High' },
+      { field: 'timestamp', order: 'desc', text: 'Date: New to Old' },
+      { field: 'timestamp', order: 'asc', text: 'Date: Old to New' }
+    ];
+  }
+
+  handleSort = (field, order) => {
+    this.props.dispatch(sortPosts(field, order));
+  };
+
   handleItemClick = (e, { name }) => {
     if (this.props.pathNames.indexOf(name) > -1) {
       this.props.history.push(`/${name}`);
@@ -20,6 +35,30 @@ class NavBar extends Component {
         active={pathName === currentPath}
         onClick={this.handleItemClick}
       />
+    );
+  }
+
+  renderSortDropdown() {
+    const { sortBy, sortOrder } = this.props;
+
+    return (
+      <Menu.Menu position='right'>
+        <Dropdown item position='right' text='Sort'>
+          <Dropdown.Menu>
+            {
+              this.sortOptions.map(option => {
+                const { field, order, text } = option;
+                const isSelected = (field === sortBy) && (order === sortOrder);
+                return (
+                  <Dropdown.Item onClick={() => this.handleSort(field, order)}>
+                    { isSelected ? <b>{text}</b> : text }
+                  </Dropdown.Item>
+                );
+              })
+            }
+          </Dropdown.Menu>
+        </Dropdown>
+      </Menu.Menu>
     );
   }
 
@@ -38,6 +77,7 @@ class NavBar extends Component {
             return this.renderMenuItem(pathName, currentPath);
           })
         }
+        {this.renderSortDropdown()}
       </Menu>
     );
   }
@@ -53,7 +93,9 @@ NavBar.defaultProps = {
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    pathNames: state.category.categories
+    pathNames: state.category.categories,
+    sortBy: state.post.sortBy,
+    sortOrder: state.post.sortOrder
   };
 };
 

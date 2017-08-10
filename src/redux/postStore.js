@@ -19,13 +19,16 @@ import { createActions } from './utils';
 const nameSpace = 'POST';
 const actions = createActions([
   'UP_VOTE', 'DOWN_VOTE', 'SET_VOTE',
-  'PROMISE_GET_ALL', 'RESOLVE_GET_ALL', 'REJECT_GET_ALL'
+  'PROMISE_GET_ALL', 'RESOLVE_GET_ALL', 'REJECT_GET_ALL',
+  'SORT'
 ], nameSpace);
 
 const initialState = {
   loading: false,
   loadError: null,
-  posts: {}
+  posts: {},
+  sortBy: ['voteScore', 'timestamp'][0],
+  sortOrder: ['asc', 'desc'][1]
 };
 
 /******************************************************************************/
@@ -70,6 +73,10 @@ export const downVotePost = (postId) => {
         dispatch({ type: actions.UP_VOTE, postId });
       });
   };
+};
+
+export const sortPosts = (field, order) => {
+  return { type: actions.SORT, field, order };
 };
 
 /******************************************************************************/
@@ -117,6 +124,15 @@ const handleUpDownVote = (state, action, change) => {
   }
 };
 
+const handleSort = (state, action) => {
+  const { field, order } = action;
+  return {
+    ...state,
+    sortBy: field,
+    sortOrder: order
+  };
+};
+
 /******************************************************************************/
 // Reducer Function
 /******************************************************************************/
@@ -134,6 +150,8 @@ const postReducer = (state = initialState, action) => {
       return handleResolveGetAll(state, action);
     case actions.REJECT_GET_ALL:
       return handleRejectGetAll(state, action);
+    case actions.SORT:
+      return handleSort(state, action);
     default:
       return state;
   }

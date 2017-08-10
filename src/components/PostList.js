@@ -33,10 +33,16 @@ PostList.defaultProps = {
 
 const mapStateToProps = (state, ownProps) => {
   const { category } = ownProps;
+  const { sortBy, sortOrder } = state.post;
   let posts = _.values(state.post.posts);
   if (_.isString(category)) {
     posts = _.values(posts).filter(post => post.category === category);
   }
+  posts = posts.sort((a, b) => {
+    const temp = a[sortBy] - b[sortBy];
+    const modifier = sortOrder === 'asc' ? 1 : -1;
+    return  temp * modifier; 
+  });
   return { posts };
 };
 
