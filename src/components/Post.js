@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import _ from 'lodash';
 import moment from 'moment';
-import { Link } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 import {
   Card, Image, Icon, Popup, Button, Dimmer, Header, Loader, Label, Segment
 } from 'semantic-ui-react';
@@ -32,8 +32,12 @@ class Post extends Component {
   }
 
   handleConfirmDelete = () => {
-    const { dispatch, id } = this.props;
-    dispatch(confirmDeletePost(id));
+    const { dispatch, id, isDetailView, history } = this.props;
+    let redirect;
+    if (isDetailView) {
+      redirect = () => history.push('/');
+    }
+    dispatch(confirmDeletePost(id, redirect));
   }
 
   handleCancelDelete = () => {
@@ -65,11 +69,11 @@ class Post extends Component {
   }
 
   renderPost() {
+    const { isDetailView } = this.props;
     const {
       id, timestamp, title, body, author, category, voteScore, thumb
     } = this.props.post;
     const showDimmer = id === this.props.delete.id;
-    const isDetailView = _.get(this.props.match, 'params.postId');
 
     return (
       <Dimmer.Dimmable as={Card} fluid blurring dimmed={showDimmer}>
@@ -126,7 +130,8 @@ class Post extends Component {
   }
 
   render() {
-    const { id, loading, error, post } = this.props;
+    const { id, post } = this.props;
+    const { loading, error } = post || {};
 
     if (loading) {
       return (
@@ -165,7 +170,8 @@ const mapStateToProps = (state, ownProps) => {
     id,
     post: state.post.posts[id],
     delete: state.post.delete,
+    isDetailView: _.get(ownProps.match, 'params.postId')
   };
 };
 
-export default connect(mapStateToProps)(Post);
+export default withRouter(connect(mapStateToProps)(Post));

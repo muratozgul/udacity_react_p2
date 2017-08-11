@@ -2,11 +2,35 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
-import { Grid, Item } from 'semantic-ui-react';
+import { Grid, Item, Loader, Segment, Icon } from 'semantic-ui-react';
 import Post from './Post';
 
 class PostList extends Component {
-  render() {
+  renderLoading() {
+    return (
+      <Loader active inline='centered' />
+    );
+  }
+
+  renderError() {
+    return (
+      <Segment color='red' textAlign='center'>
+        <Icon name='warning sign' color='red' />
+        Failed to load the posts
+      </Segment>
+    );
+  }
+
+  renderNoResults() {
+    return (
+      <Segment color='grey' textAlign='center'>
+        <Icon name='info circle' color='grey' />
+        There are no posts to show
+      </Segment>
+    );
+  }
+
+  renderPosts() {
     const { posts } = this.props;
     const postComponents = posts.map(post => {
       return (
@@ -17,14 +41,30 @@ class PostList extends Component {
         </Grid.Row>
       );
     });
-
     return <Grid columns={1}>{postComponents}</Grid>;
+  }
+
+
+  render() {
+    const { loading, error, posts } = this.props;
+
+    if (loading) {
+      return this.renderLoading();
+    } else if (error) {
+      return this.renderError();
+    } else if (_.isEmpty(posts)) {
+      return this.renderNoResults();
+    } else {
+      return this.renderPosts();
+    }
   }
 };
 
 PostList.propTypes = {
   posts: PropTypes.arrayOf(PropTypes.object),
-  category: PropTypes.string
+  category: PropTypes.string,
+  loading: PropTypes.bool,
+  error: PropTypes.object
 };
 
 PostList.defaultProps = {
@@ -41,9 +81,10 @@ const mapStateToProps = (state, ownProps) => {
   posts = posts.sort((a, b) => {
     const temp = a[sortBy] - b[sortBy];
     const modifier = sortOrder === 'asc' ? 1 : -1;
-    return  temp * modifier; 
+    return  temp * modifier;
   });
-  return { posts };
+  const { loading, error } = state.post.posts;
+  return { loading, error, posts };
 };
 
 export default connect(mapStateToProps)(PostList);

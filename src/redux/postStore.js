@@ -27,7 +27,7 @@ const actions = createActions([
 
 const initialState = {
   loading: false,
-  loadError: null,
+  error: null,
   posts: {},
   sortBy: ['voteScore', 'timestamp'][0],
   sortOrder: ['asc', 'desc'][1],
@@ -64,7 +64,9 @@ export const getPost = (postId) => {
         return { ...post, thumb: API.getImageUrl(post.author) };
       })
       .then(post => dispatch({ type: actions.RESOLVE_GET, postId, post }))
-      .catch(error => dispatch({ type: actions.REJECT_GET, postId, error }));
+      .catch(error => {
+        dispatch({ type: actions.REJECT_GET, postId, error })
+      });
   };
 };
 
@@ -102,13 +104,16 @@ export const intentDeletePost = (postId) => {
   return { type: actions.INTENT_DELETE, postId };
 };
 
-export const confirmDeletePost = (postId) => {
+export const confirmDeletePost = (postId, redirect) => {
   return (dispatch, getState) => {
     postId = postId || getState().post.delete.id;
     dispatch({ type: actions.PROMISE_DELETE, postId });
     API.deletePost(postId)
       .then(res => {
         dispatch({ type: actions.RESOLVE_DELETE, postId });
+        if (_.isFunction(redirect)) {
+          redirect();
+        }
       })
       .catch(error => {
         dispatch({ type: actions.REJECT_DELETE, postId, error });

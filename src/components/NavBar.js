@@ -42,7 +42,7 @@ class NavBar extends Component {
   renderMenuItem(pathName, currentPath) {
     return (
       <Menu.Item name={pathName} key={pathName}
-        active={pathName === currentPath}
+        active={currentPath.startsWith(`/${pathName}`)}
         onClick={this.handleItemClick}
       />
     );
@@ -74,7 +74,7 @@ class NavBar extends Component {
 
   render() {
     const { pathNames } = this.props;
-    const currentPath = _.get(this.props, 'match.params.category', '/');
+    const currentPath = _.get(this.props, 'location.pathname', '/');
 
     return (
       <Menu pointing secondary>
