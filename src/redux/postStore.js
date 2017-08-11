@@ -19,6 +19,7 @@ import { createActions } from './utils';
 const nameSpace = 'POST';
 const actions = createActions([
   'UP_VOTE', 'DOWN_VOTE', 'SET_VOTE',
+  'PROMISE_GET', 'RESOLVE_GET', 'REJECT_GET',
   'PROMISE_GET_ALL', 'RESOLVE_GET_ALL', 'REJECT_GET_ALL',
   'SORT',
   'INTENT_DELETE', 'CANCEL_DELETE', 'PROMISE_DELETE', 'RESOLVE_DELETE', 'REJECT_DELETE'
@@ -52,6 +53,18 @@ export const getAllPosts = () => {
       })
       .then(posts => dispatch({ type: actions.RESOLVE_GET_ALL, posts }))
       .catch(error => dispatch({ type: actions.REJECT_GET_ALL, error }));
+  };
+};
+
+export const getPost = (postId) => {
+  return (dispatch, getState) => {
+    dispatch({ type: actions.PROMISE_GET, postId });
+    return API.getPost(postId)
+      .then(post => {
+        return { ...post, thumb: API.getImageUrl(post.author) };
+      })
+      .then(post => dispatch({ type: actions.RESOLVE_GET, postId, post }))
+      .catch(error => dispatch({ type: actions.REJECT_GET, postId, error }));
   };
 };
 
@@ -110,6 +123,39 @@ export const cancelDeletePost = () => {
 /******************************************************************************/
 // Action Handlers
 /******************************************************************************/
+const handlePromiseGet = (state, action) => {
+  const { postId } = action;
+  return {
+    ...state,
+    posts: {
+      ...state.posts,
+      [postId]: { id: postId, loading: true, error: null }
+    }
+  };
+};
+
+const handleResolveGet = (state, action) => {
+  const { postId, post } = action;
+  return {
+    ...state,
+    posts: {
+      ...state.posts,
+      [postId]: post
+    }
+  };
+};
+
+const handleRejectGet = (state, action) => {
+  const { postId, error } = action;
+  return {
+    ...state,
+    posts: {
+      ...state.posts,
+      [postId]: { id: postId, loading: false, error }
+    }
+  };
+}
+
 const handlePromiseGetAll = (state, action) => {
   return { ...state, loading: true, error: null };
 };
@@ -230,6 +276,13 @@ const postReducer = (state = initialState, action) => {
       return handleUpDownVote(state, action, -1);
     case actions.SET_VOTE:
       return handleSetVote(state, action);
+    // get
+    case actions.PROMISE_GET:
+      return handlePromiseGet(state, action);
+    case actions.RESOLVE_GET:
+      return handleResolveGet(state, action);
+    case actions.REJECT_GET:
+      return handleRejectGet(state, action);
     // getAll
     case actions.PROMISE_GET_ALL:
       return handlePromiseGetAll(state, action);

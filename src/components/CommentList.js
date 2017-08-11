@@ -8,6 +8,19 @@ import { Icon, Loader, Accordion, Comment } from 'semantic-ui-react';
 import CommentListItem from './CommentListItem';
 
 class CommentList extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      activeIndex: props.startOpen ? 0 : -1
+    };
+  }
+
+  handleTitleClick = () => {
+    this.setState((prevState, props) => {
+      return { activeIndex: prevState.activeIndex === -1 ? 0 : -1 };
+   });
+  }
+
   loadComments = (isVisible) => {
     // @see https://github.com/joshwnj/react-visibility-sensor
     if (isVisible) {
@@ -19,7 +32,9 @@ class CommentList extends Component {
     const { commentIdsArray } = this.props;
     const num = commentIdsArray.length;
     return (
-      <Accordion styled={false}>
+      <Accordion styled={false} activeIndex={this.state.activeIndex}
+        onTitleClick={this.handleTitleClick}
+      >
         <Accordion.Title>
           <a>
             <Icon name='comment outline' />{num} Comments

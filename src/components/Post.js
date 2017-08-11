@@ -1,14 +1,26 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import _ from 'lodash';
 import moment from 'moment';
-import { Card, Image, Icon, Popup, Button, Dimmer, Header, Loader } from 'semantic-ui-react';
+import { Link } from 'react-router-dom';
+import {
+  Card, Image, Icon, Popup, Button, Dimmer, Header, Loader, Label, Segment
+} from 'semantic-ui-react';
 import CommentList from './CommentList';
 import VoteBox from './VoteBox';
+import { getPost } from '../redux/postStore';
 import { openEditForm } from '../redux/postFormStore';
 import { intentDeletePost, cancelDeletePost, confirmDeletePost } from '../redux/postStore';
 
 class Post extends Component {
+  componentDidMount() {
+    const { id, post } = this.props;
+    if (post == null) {
+      this.props.dispatch(getPost(id));
+    }
+  }
+
   handleEdit = () => {
     const { dispatch, id } = this.props;
     dispatch(openEditForm(id));
@@ -52,21 +64,29 @@ class Post extends Component {
     }
   }
 
-  render() {
+  renderPost() {
     const {
       id, timestamp, title, body, author, category, voteScore, thumb
-    } = this.props;
+    } = this.props.post;
     const showDimmer = id === this.props.delete.id;
+    const isDetailView = _.get(this.props.match, 'params.postId');
 
     return (
       <Dimmer.Dimmable as={Card} fluid blurring dimmed={showDimmer}>
-        <Dimmer active={showDimmer} onClickOutside={() => {}}>
+        <Dimmer active={showDimmer}>
           {this.renderDeleteConfirmation()}
         </Dimmer>
+        <div style={{ position: 'absolute', right: '13px', top: '2px' }}>
+          <Label size='mini' ribbon='right'>{_.upperFirst(category)}</Label>
+        </div>
         <Card.Content>
           <Image floated='left' size='mini' src={thumb} />
           <Card.Header>
-            {title}
+            {
+              isDetailView
+              ? title
+              : <Link to={`/${category}/${id}`}>{title}</Link>
+            }
           </Card.Header>
           <Card.Meta>
             <span><b>{author}</b> {moment(timestamp).fromNow()}</span>
@@ -98,36 +118,52 @@ class Post extends Component {
         </Card.Content>
         <Card.Content extra style={{ paddingTop: 0, paddingBottom: 0 }}>
           <div style={{ minHeight: '34px' }}>
-            <CommentList postId={id} />
+            <CommentList postId={id} startOpen={isDetailView} />
           </div>
         </Card.Content>
       </Dimmer.Dimmable>
     );
   }
+
+  render() {
+    const { id, loading, error, post } = this.props;
+
+    if (loading) {
+      return (
+        <Loader active inline='centered' />
+      );
+    } else if (error) {
+      return (
+        <Segment color='red' textAlign='center'>
+          <Icon name='warning sign' color='red' />
+          Failed to load the post
+        </Segment>
+      );
+    } else if (post != null) {
+      return this.renderPost();
+    } else {
+      return null;
+    }
+  }
 };
 
 Post.propTypes = {
   id: PropTypes.string.isRequired,
-  timestamp: PropTypes.number.isRequired,
-  title: PropTypes.string.isRequired,
-  body: PropTypes.string.isRequired,
-  author: PropTypes.string.isRequired,
-  category: PropTypes.string,
-  voteScore: PropTypes.number,
-  thumb: PropTypes.string,
-  deleting: PropTypes.bool,
-  deleteIntent: PropTypes.object
+  post: PropTypes.object,
+  loading: PropTypes.bool,
+  error: PropTypes.object,
+  delete: PropTypes.object
 };
 
 PropTypes.defaultProps = {
-  voteScore: 0,
   delete: {}
-}
+};
 
 const mapStateToProps = (state, ownProps) => {
-  const { id } = ownProps;
+  const id = ownProps.id || ownProps.match.params.postId;
   return {
-    ...state.post.posts[id],
+    id,
+    post: state.post.posts[id],
     delete: state.post.delete,
   };
 };

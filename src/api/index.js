@@ -16,6 +16,11 @@ export const initializeAPI = (url = DEFAULT_SERVER_URL, options = {}) => {
       .then(res => res.json());
   };
 
+  API.getPost = (postId) => {
+    return fetch(`${url}/posts/${postId}`, { headers })
+      .then(res => res.json());
+  }
+
   API.getAllPosts = () => {
     return fetch(`${url}/posts`, { headers })
       .then(res => res.json());

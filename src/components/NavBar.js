@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import _ from 'lodash';
 import { Menu, Icon, Dropdown } from 'semantic-ui-react';
 import { connect } from 'react-redux';
+import { getAllCategories } from '../redux/categoryStore';
 import { sortPosts } from '../redux/postStore';
 import { openNewForm } from '../redux/postFormStore';
 
@@ -16,6 +17,10 @@ class NavBar extends Component {
       { field: 'timestamp', order: 'desc', text: 'Date: New to Old' },
       { field: 'timestamp', order: 'asc', text: 'Date: Old to New' }
     ];
+  }
+
+  componentDidMount() {
+    this.props.dispatch(getAllCategories());
   }
 
   handleSort = (field, order) => {
