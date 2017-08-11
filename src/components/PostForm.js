@@ -25,7 +25,7 @@ class PostForm extends Component {
   }
 
   renderForm() {
-    const { submitting, author, category, title, body } = this.props;
+    const { submitting, author, category, title, body, formType } = this.props;
     const categories = this.props.categories.map(c => {
       return { key: c, text: _.upperFirst(c), value: c };
     });
@@ -35,10 +35,12 @@ class PostForm extends Component {
         <Form.Group widths='equal'>
           <Form.Input label='Username' placeholder='Username'
             name='author' value={author} onChange={this.handleChange}
+            disabled={formType === 'edit'}
           />
           <Form.Select label='Category' options={categories}
             name='category' value={category} placeholder='Category'
             onChange={this.handleChange}
+            disabled={formType === 'edit'}
           />
         </Form.Group>
         <Form.Input label='Title' placeholder='Title'
@@ -52,10 +54,12 @@ class PostForm extends Component {
   }
 
   render() {
-    const { visible, submitDisabled } = this.props;
+    const { visible, submitDisabled, formType } = this.props;
     return (
       <Modal dimmer='blurring' open={visible} onClose={this.handleClose}>
-        <Modal.Header>Create a New Post</Modal.Header>
+        <Modal.Header>
+          { formType === 'edit' ? 'Edit Post' : 'Create a New Post' }
+        </Modal.Header>
         <Modal.Content>
           {this.renderForm()}
         </Modal.Content>
@@ -64,7 +68,8 @@ class PostForm extends Component {
             content='Discard'
           />
           <Button positive icon='checkmark' labelPosition='right'
-            onClick={this.handleSubmit} content='Post'
+            onClick={this.handleSubmit}
+            content={ formType === 'edit' ? 'Update' : 'Post' }
             disabled={submitDisabled} />
         </Modal.Actions>
       </Modal>
@@ -97,7 +102,12 @@ PostForm.defaultProps = {
 const mapStateToProps = (state, ownProps) => {
   const { visible, submitting, submitError, formType, postData } = state.postForm;
   const { categories } = state.category;
-  const submitDisabled = _.values(postData).some(value => {
+  const requiredFields = ['title', 'body'];
+  if (formType === 'new') {
+    requiredFields.push('author', 'category');
+  }
+  const submitDisabled = requiredFields.some(field => {
+    const value = postData[field];
     return !(_.isString(value) && _.trim(value).length > 0);
   });
 

@@ -21,12 +21,16 @@ export const initializeAPI = (url = DEFAULT_SERVER_URL, options = {}) => {
       .then(res => res.json());
   };
 
+  API.deletePost = (postId) => {
+    return fetch(`${url}/posts/${postId}`, { method: 'DELETE', headers });
+  };
+
   API.getCommentsForPost = (postId) => {
     return fetch(`${url}/posts/${postId}/comments`, { headers })
       .then(res => res.json());
   };
 
-  API.postComment = (postData) => {
+  API.createNewPost = (postData) => {
     const post = {
       id: uuid(),
       timestamp: Date.now(),
@@ -42,7 +46,18 @@ export const initializeAPI = (url = DEFAULT_SERVER_URL, options = {}) => {
     };
     return fetch(`${url}/posts`, options)
       .then(res => res.json());
-  }
+  };
+
+  API.editPost = (postData) => {
+    const { id, title, body } = postData;
+    const options = {
+      method: 'PUT',
+      headers: { ...headers, 'content-type': 'application/json' },
+      body: JSON.stringify({ title, body })
+    };
+    return fetch(`${url}/posts/${id}`, options)
+      .then(res => res.json());
+  };
 
   const voteComment = (commentId, option) => {
     const options = {

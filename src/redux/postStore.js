@@ -33,7 +33,7 @@ const initialState = {
   delete: {
     id: null,
     deleting: false,
-    deleteError: null
+    error: null
   }
 };
 
@@ -89,9 +89,17 @@ export const intentDeletePost = (postId) => {
   return { type: actions.INTENT_DELETE, postId };
 };
 
-export const confirmDeletePost = () => {
+export const confirmDeletePost = (postId) => {
   return (dispatch, getState) => {
-
+    postId = postId || getState().post.delete.id;
+    dispatch({ type: actions.PROMISE_DELETE, postId });
+    API.deletePost(postId)
+      .then(res => {
+        dispatch({ type: actions.RESOLVE_DELETE, postId });
+      })
+      .catch(error => {
+        dispatch({ type: actions.REJECT_DELETE, postId, error });
+      });
   };
 };
 
@@ -159,18 +167,20 @@ const handleIntentDelete = (state, action) => {
     delete: {
       id: action.postId,
       deleting: false,
-      deleteError: null
+      error: null
     }
   };
 };
 
 const handlePromiseDelete = (state, action) => {
+  const { postId } = action;
   return {
     ...state,
+    posts: _.omit(state.posts, postId),
     delete: {
-      id: action.postId,
+      id: postId,
       deleting: true,
-      deleteError: null
+      error: null
     }
   };
 };
@@ -181,7 +191,7 @@ const handleResolveDelete = (state, action) => {
     delete: {
       id: null,
       deleting: false,
-      deleteError: null
+      error: null
     }
   };
 };
@@ -192,7 +202,7 @@ const handleRejectDelete = (state, action) => {
     delete: {
       id: action.postId,
       deleting: false,
-      deleteError: action.error
+      error: action.error
     }
   };
 };
@@ -203,7 +213,7 @@ const handleCancelDelete = (state, action) => {
     delete: {
       id: null,
       deleting: false,
-      deleteError: null
+      error: null
     }
   };
 };

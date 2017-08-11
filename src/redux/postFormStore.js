@@ -63,8 +63,15 @@ export const discardForm = () => {
 export const submitForm = () => {
   return (dispatch, getState) => {
     dispatch({ type: actions.PROMISE_SUBMIT });
-    return API.postComment(getState().postForm.postData)
-      .then(res => {
+    const { formType, postData } = getState().postForm;
+    let promise;
+    if (formType === 'edit') {
+      promise = API.editPost(_.pick(postData, ['id', 'title', 'body']));
+    } else {
+      const formData = _.pick()
+      promise = API.createNewPost(postData);
+    }
+    return promise.then(res => {
         dispatch({ type: actions.RESOLVE_SUBMIT });
         dispatch(getAllPosts());
       })
@@ -141,20 +148,23 @@ const handleFieldChange = (state, action) => {
 /******************************************************************************/
 const postFormReducer = (state = initialState, action) => {
   switch (action.type) {
+    // view
     case actions.OPEN_NEW:
       return handleOpenNew(state, action);
     case actions.OPEN_EDIT:
       return handleOpenEdit(state, action);
     case actions.CLOSE:
       return handleClose(state, action);
+    case actions.DISCARD:
+      return handleDiscard(state, action);
+    // submit
     case actions.PROMISE_SUBMIT:
       return handlePromiseSubmit(state, action);
     case actions.RESOLVE_SUBMIT:
       return handleResolveSubmit(state, action);
     case actions.REJECT_SUBMIT:
       return handleRejectSubmit(state, action);
-    case actions.DISCARD:
-      return handleDiscard(state, action);
+    // change
     case actions.FIELD_CHANGE:
       return handleFieldChange(state, action);
     default:

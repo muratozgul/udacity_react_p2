@@ -11,8 +11,6 @@ import { createActions } from './utils';
   parentId: "8xf0y6ziyjabvozdd253nd",
   timestamp: 1468166872634,
   voteScore: 6
-
-  thumb: 'link'
 */
 
 /******************************************************************************/
@@ -141,23 +139,38 @@ const handleUpDownVote = (state, action, change) => {
   }
 };
 
+const handleDeleteCommentsForPost = (state, action) => {
+  const { postId } = action;
+  const commentIds = state.postIdMap[postId];
+  return {
+    ...state,
+    comments: _.omit(state.comments, commentIds),
+    postIdMap: _.omit(state.postIdMap, postId)
+  };
+};
+
 /******************************************************************************/
 // Reducer Function
 /******************************************************************************/
 const commentReducer = (state = initialState, action) => {
   switch (action.type) {
+    // vote
     case actions.UP_VOTE:
       return handleUpDownVote(state, action, 1);
     case actions.DOWN_VOTE:
       return handleUpDownVote(state, action, -1);
     case actions.SET_VOTE:
       return handleSetVote(state, action);
+    // get
     case actions.PROMISE_GET:
       return handlePromiseGet(state, action);
     case actions.RESOLVE_GET:
       return handleResolveGet(state, action);
     case actions.REJECT_GET:
       return handleRejectGet(state, action);
+    // foreign events
+    case 'POST::PROMISE_DELETE':
+      return handleDeleteCommentsForPost(state, action);
     default:
       return state;
   }

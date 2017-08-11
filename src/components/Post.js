@@ -20,8 +20,8 @@ class Post extends Component {
   }
 
   handleConfirmDelete = () => {
-    const { dispatch } = this.props;
-    dispatch(confirmDeletePost());
+    const { dispatch, id } = this.props;
+    dispatch(confirmDeletePost(id));
   }
 
   handleCancelDelete = () => {
@@ -30,7 +30,7 @@ class Post extends Component {
   }
 
   renderDeleteConfirmation = () => {
-    const { deleting, error} = this.props.delete;
+    const { deleting, error } = this.props.delete;
     if (deleting) {
       return <Loader>Deleting...</Loader>
     } else if (error) {
@@ -121,8 +121,7 @@ Post.propTypes = {
 
 PropTypes.defaultProps = {
   voteScore: 0,
-  deleting: false,
-  deleteError: null
+  delete: {}
 }
 
 const mapStateToProps = (state, ownProps) => {
