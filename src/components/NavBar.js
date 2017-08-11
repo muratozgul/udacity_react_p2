@@ -5,7 +5,7 @@ import _ from 'lodash';
 import { Menu, Icon, Dropdown } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import { sortPosts } from '../redux/postStore';
-import { openForm } from '../redux/postFormStore';
+import { openNewForm } from '../redux/postFormStore';
 
 class NavBar extends Component {
   constructor(props) {
@@ -23,7 +23,7 @@ class NavBar extends Component {
   };
 
   handleNewPost = () => {
-    this.props.dispatch(openForm());
+    this.props.dispatch(openNewForm());
   };
 
   handleItemClick = (e, { name }) => {

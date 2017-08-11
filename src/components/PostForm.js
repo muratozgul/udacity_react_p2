@@ -82,6 +82,7 @@ PostForm.propTypes = {
   category: PropTypes.string,
   title: PropTypes.string,
   body: PropTypes.string,
+  formType: PropTypes.oneOf(['new', 'edit'])
 };
 
 PostForm.defaultProps = {
@@ -89,17 +90,19 @@ PostForm.defaultProps = {
   visible: false,
   submitting: false,
   submitError: null,
-  categories: []
+  categories: [],
+  formType: 'new'
 };
 
 const mapStateToProps = (state, ownProps) => {
-  const { visible, submitting, submitError, postData } = state.postForm;
+  const { visible, submitting, submitError, formType, postData } = state.postForm;
   const { categories } = state.category;
   const submitDisabled = _.values(postData).some(value => {
     return !(_.isString(value) && _.trim(value).length > 0);
   });
 
   return {
+    formType,
     submitDisabled,
     visible,
     submitting,

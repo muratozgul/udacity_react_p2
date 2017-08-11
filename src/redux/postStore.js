@@ -20,7 +20,8 @@ const nameSpace = 'POST';
 const actions = createActions([
   'UP_VOTE', 'DOWN_VOTE', 'SET_VOTE',
   'PROMISE_GET_ALL', 'RESOLVE_GET_ALL', 'REJECT_GET_ALL',
-  'SORT'
+  'SORT',
+  'INTENT_DELETE', 'CANCEL_DELETE', 'PROMISE_DELETE', 'RESOLVE_DELETE', 'REJECT_DELETE'
 ], nameSpace);
 
 const initialState = {
@@ -28,7 +29,12 @@ const initialState = {
   loadError: null,
   posts: {},
   sortBy: ['voteScore', 'timestamp'][0],
-  sortOrder: ['asc', 'desc'][1]
+  sortOrder: ['asc', 'desc'][1],
+  delete: {
+    id: null,
+    deleting: false,
+    deleteError: null
+  }
 };
 
 /******************************************************************************/
@@ -77,6 +83,20 @@ export const downVotePost = (postId) => {
 
 export const sortPosts = (field, order) => {
   return { type: actions.SORT, field, order };
+};
+
+export const intentDeletePost = (postId) => {
+  return { type: actions.INTENT_DELETE, postId };
+};
+
+export const confirmDeletePost = () => {
+  return (dispatch, getState) => {
+
+  };
+};
+
+export const cancelDeletePost = () => {
+  return { type: actions.CANCEL_DELETE };
 };
 
 /******************************************************************************/
@@ -133,25 +153,94 @@ const handleSort = (state, action) => {
   };
 };
 
+const handleIntentDelete = (state, action) => {
+  return {
+    ...state,
+    delete: {
+      id: action.postId,
+      deleting: false,
+      deleteError: null
+    }
+  };
+};
+
+const handlePromiseDelete = (state, action) => {
+  return {
+    ...state,
+    delete: {
+      id: action.postId,
+      deleting: true,
+      deleteError: null
+    }
+  };
+};
+
+const handleResolveDelete = (state, action) => {
+  return {
+    ...state,
+    delete: {
+      id: null,
+      deleting: false,
+      deleteError: null
+    }
+  };
+};
+
+const handleRejectDelete = (state, action) => {
+  return {
+    ...state,
+    delete: {
+      id: action.postId,
+      deleting: false,
+      deleteError: action.error
+    }
+  };
+};
+
+const handleCancelDelete = (state, action) => {
+  return {
+    ...state,
+    delete: {
+      id: null,
+      deleting: false,
+      deleteError: null
+    }
+  };
+};
+
 /******************************************************************************/
 // Reducer Function
 /******************************************************************************/
 const postReducer = (state = initialState, action) => {
   switch (action.type) {
+    // vote
     case actions.UP_VOTE:
       return handleUpDownVote(state, action, 1);
     case actions.DOWN_VOTE:
       return handleUpDownVote(state, action, -1);
     case actions.SET_VOTE:
       return handleSetVote(state, action);
+    // getAll
     case actions.PROMISE_GET_ALL:
       return handlePromiseGetAll(state, action);
     case actions.RESOLVE_GET_ALL:
       return handleResolveGetAll(state, action);
     case actions.REJECT_GET_ALL:
       return handleRejectGetAll(state, action);
+    // sort
     case actions.SORT:
       return handleSort(state, action);
+    // delete
+    case actions.INTENT_DELETE:
+      return handleIntentDelete(state, action);
+    case actions.CANCEL_DELETE:
+      return handleCancelDelete(state, action);
+    case actions.PROMISE_DELETE:
+      return handlePromiseDelete(state, action);
+    case actions.RESOLVE_DELETE:
+      return handleResolveDelete(state, action);
+    case actions.REJECT_DELETE:
+      return handleRejectDelete(state, action);
     default:
       return state;
   }

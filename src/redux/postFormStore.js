@@ -19,15 +19,15 @@ import { getAllPosts } from './postStore';
 /******************************************************************************/
 const nameSpace = 'POST_FORM';
 export const actions = createActions([
-  'OPEN', 'CLOSE',
-  'PROMISE_SUBMIT', 'RESOLVE_SUBMIT', 'REJECT_SUBMIT',
-  'DISCARD', 'FIELD_CHANGE'
+  'OPEN_NEW', 'OPEN_EDIT', 'CLOSE', 'DISCARD', 'FIELD_CHANGE',
+  'PROMISE_SUBMIT', 'RESOLVE_SUBMIT', 'REJECT_SUBMIT'
 ], nameSpace);
 
 const initialState = {
   visible: false,
   submitting: false,
   submitError: null,
+  formType: ['new', 'edit'][0],
   postData: {
     author: '',
     category: '',
@@ -39,8 +39,17 @@ const initialState = {
 /******************************************************************************/
 // Action Creators
 /******************************************************************************/
-export const openForm = () => {
-  return { type: actions.OPEN };
+export const openNewForm = () => {
+  return { type: actions.OPEN_NEW };
+};
+
+export const openEditForm = (postId) => {
+  return (dispatch, getState) => {
+    const post = getState().post.posts[postId];
+    if (_.isObject(post)) {
+      dispatch({ type: actions.OPEN_EDIT, post });
+    }
+  };
 };
 
 export const closeForm = () => {
@@ -74,18 +83,26 @@ export const formChange = (field, value) => {
 /******************************************************************************/
 // Action Handlers
 /******************************************************************************/
-const handleOpen = (state, action) => {
+const handleOpenNew = (state, action) => {
+  return { ...state, visible: true, formType: 'new' };
+};
+
+const handleOpenEdit = (state, action) => {
+  const { post } = action;
   return {
     ...state,
     visible: true,
+    formType: 'edit',
+    postData: { ...post }
   };
 };
 
 const handleClose = (state, action) => {
-  return {
-    ...state,
-    visible: false,
-  };
+  return { ...state, visible: false };
+};
+
+const handleDiscard = (state, action) => {
+  return { ...initialState };
 };
 
 const handlePromiseSubmit = (state, action) => {
@@ -108,10 +125,6 @@ const handleRejectSubmit = (state, action) => {
   };
 };
 
-const handleDiscard = (state, action) => {
-  return { ...initialState };
-};
-
 const handleFieldChange = (state, action) => {
   const { field, value } = action;
   return {
@@ -128,8 +141,10 @@ const handleFieldChange = (state, action) => {
 /******************************************************************************/
 const postFormReducer = (state = initialState, action) => {
   switch (action.type) {
-    case actions.OPEN:
-      return handleOpen(state, action);
+    case actions.OPEN_NEW:
+      return handleOpenNew(state, action);
+    case actions.OPEN_EDIT:
+      return handleOpenEdit(state, action);
     case actions.CLOSE:
       return handleClose(state, action);
     case actions.PROMISE_SUBMIT:

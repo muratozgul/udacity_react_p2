@@ -21,8 +21,11 @@ class CommentList extends Component {
     return (
       <Accordion styled={false}>
         <Accordion.Title>
-          <Icon name='comment' />{num} Comments
-          { num > 0 ? <Icon name='dropdown' /> : null }
+          <a>
+            <Icon name='comment outline' />{num} Comments
+            { num > 0 ? <Icon name='dropdown' /> : null }
+          </a>
+          {/* <Icon name='comment outline' />{num} Comments */}
         </Accordion.Title>
         <Accordion.Content>
           {
