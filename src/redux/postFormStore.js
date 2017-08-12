@@ -32,7 +32,7 @@ const initialState = {
     author: '',
     category: '',
     title: '',
-    body: '',
+    body: ''
   }
 };
 
@@ -68,7 +68,6 @@ export const submitForm = () => {
     if (formType === 'edit') {
       promise = API.editPost(_.pick(postData, ['id', 'title', 'body']));
     } else {
-      const formData = _.pick()
       promise = API.createNewPost(postData);
     }
     return promise.then(res => {

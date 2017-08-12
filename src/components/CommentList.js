@@ -6,6 +6,7 @@ import { getCommentsForPost } from '../redux/commentStore';
 import VisibilitySensor from 'react-visibility-sensor';
 import { Icon, Loader, Accordion, Comment } from 'semantic-ui-react';
 import CommentListItem from './CommentListItem';
+import CommentForm from './CommentForm';
 
 class CommentList extends Component {
   constructor(props) {
@@ -29,7 +30,7 @@ class CommentList extends Component {
   }
 
   renderComments() {
-    const { commentIdsArray } = this.props;
+    const { postId, commentIdsArray } = this.props;
     const num = commentIdsArray.length;
     return (
       <Accordion styled={false} activeIndex={this.state.activeIndex}
@@ -54,6 +55,7 @@ class CommentList extends Component {
               }
             </Comment.Group>
           }
+          <CommentForm formType='new' id={postId} />
         </Accordion.Content>
       </Accordion>
     );

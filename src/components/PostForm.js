@@ -56,7 +56,7 @@ class PostForm extends Component {
   render() {
     const { visible, submitDisabled, formType } = this.props;
     return (
-      <Modal dimmer='blurring' open={visible} onClose={this.handleClose}>
+      <Modal dimmer='blurring' open={visible} onClose={this.handleDiscard}>
         <Modal.Header>
           { formType === 'edit' ? 'Edit Post' : 'Create a New Post' }
         </Modal.Header>

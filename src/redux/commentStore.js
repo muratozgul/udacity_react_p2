@@ -19,12 +19,19 @@ import { createActions } from './utils';
 const nameSpace = 'COMMENT';
 const actions = createActions([
   'UP_VOTE', 'DOWN_VOTE', 'SET_VOTE',
-  'PROMISE_GET', 'RESOLVE_GET', 'REJECT_GET'
+  'PROMISE_GET', 'RESOLVE_GET', 'REJECT_GET',
+  'NEW',
+  'INTENT_DELETE', 'CANCEL_DELETE', 'PROMISE_DELETE', 'RESOLVE_DELETE', 'REJECT_DELETE'
 ], nameSpace);
 
 const initialState = {
   comments: {},
-  postIdMap: {}
+  postIdMap: {},
+  delete: {
+    id: null,
+    deleting: false,
+    error: null
+  }
 };
 
 /******************************************************************************/
@@ -69,6 +76,29 @@ export const downVoteComment = (commentId) => {
         dispatch({ type: actions.UP_VOTE, commentId });
       });
   };
+};
+
+export const intentDeleteComment = (commentId) => {
+  return { type: actions.INTENT_DELETE, commentId };
+};
+
+export const confirmDeleteComment = (commentId) => {
+  return (dispatch, getState) => {
+    commentId = commentId || getState().comment.delete.id;
+    const postId = getState().comment.comments[commentId].parentId;
+    dispatch({ type: actions.PROMISE_DELETE, commentId });
+    API.deleteComment(commentId)
+      .then(res => {
+        dispatch({ type: actions.RESOLVE_DELETE, commentId, postId });
+      })
+      .catch(error => {
+        dispatch({ type: actions.REJECT_DELETE, commentId, error });
+      });
+  };
+};
+
+export const cancelDeleteComment = (commentId) => {
+  return { type: actions.CANCEL_DELETE };
 };
 
 /******************************************************************************/
@@ -149,6 +179,94 @@ const handleDeleteCommentsForPost = (state, action) => {
   };
 };
 
+const handleAddComment = (state, action) => {
+  const { comment } = action;
+  const postId = comment.parentId;
+  const existing = !!state.comments[comment.id];
+  const commentIdsArray = state.postIdMap[postId].comments;
+  return {
+    ...state,
+    comments: {
+      ...state.comments,
+      [comment.id]: { ...comment, thumb: API.getImageUrl(comment.author) }
+    },
+    postIdMap: {
+      ...state.postIdMap,
+      [postId]: {
+        ...state.postIdMap[postId],
+        comments: existing ? commentIdsArray : commentIdsArray.concat([comment.id])
+      }
+    }
+  };
+};
+
+const handleIntentDelete = (state, action) => {
+  return {
+    ...state,
+    delete: {
+      id: action.commentId,
+      deleting: false,
+      error: null
+    }
+  };
+};
+
+const handlePromiseDelete = (state, action) => {
+  const { commentId } = action;
+  return {
+    ...state,
+    posts: _.omit(state.posts, commentId),
+    delete: {
+      id: commentId,
+      deleting: true,
+      error: null
+    }
+  };
+};
+
+const handleResolveDelete = (state, action) => {
+  const { postId, commentId } = action;
+  const commentIds = state.postIdMap[postId].comments;
+  return {
+    ...state,
+    comments: _.omit(state.comments, commentId),
+    postIdMap: {
+      ...state.postIdMap,
+      [postId]: {
+        ...state.postIdMap[postId],
+        comments: _.without(state.postIdMap[postId].comments, commentId)
+      }
+    },
+    delete: {
+      id: null,
+      deleting: false,
+      error: null
+    }
+  };
+};
+
+const handleRejectDelete = (state, action) => {
+  return {
+    ...state,
+    delete: {
+      id: action.commentId,
+      deleting: false,
+      error: action.error
+    }
+  };
+};
+
+const handleCancelDelete = (state, action) => {
+  return {
+    ...state,
+    delete: {
+      id: null,
+      deleting: false,
+      error: null
+    }
+  };
+};
+
 /******************************************************************************/
 // Reducer Function
 /******************************************************************************/
@@ -161,6 +279,9 @@ const commentReducer = (state = initialState, action) => {
       return handleUpDownVote(state, action, -1);
     case actions.SET_VOTE:
       return handleSetVote(state, action);
+    // new
+    case actions.NEW:
+      return handleAddComment(state, action);
     // get
     case actions.PROMISE_GET:
       return handlePromiseGet(state, action);
@@ -168,6 +289,17 @@ const commentReducer = (state = initialState, action) => {
       return handleResolveGet(state, action);
     case actions.REJECT_GET:
       return handleRejectGet(state, action);
+    // delete
+    case actions.INTENT_DELETE:
+      return handleIntentDelete(state, action);
+    case actions.CANCEL_DELETE:
+      return handleCancelDelete(state, action);
+    case actions.PROMISE_DELETE:
+      return handlePromiseDelete(state, action);
+    case actions.RESOLVE_DELETE:
+      return handleResolveDelete(state, action);
+    case actions.REJECT_DELETE:
+      return handleRejectDelete(state, action);
     // foreign events
     case 'POST::PROMISE_DELETE':
       return handleDeleteCommentsForPost(state, action);

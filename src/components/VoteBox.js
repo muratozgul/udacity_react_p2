@@ -42,22 +42,16 @@ class VoteBox extends Component {
   render() {
     const { id, type } = this.props;
     const isComment = type === 'comment';
-    const style = isComment ? null : { display: 'inline-block' };
+    // const style = isComment ? null : { display: 'inline-block' };
+    const style = { display: 'inline-block' };
     return (
       <div style={style}>
         <Comment.Action onClick={this.handleUpVote}>
-          <Icon name='like outline'
-            style={{ transitionProperty: 'none' }}
-            color={'green'}
-          />
+          <Icon name='thumbs outline up' />
           {isComment ? 'Like' : null}
         </Comment.Action>
         <Comment.Action onClick={this.handleDownVote}>
-          <Icon name='dislike outline'
-            style={{ transitionProperty: 'none' }}
-            className={'like'}
-            color={'red'}
-          />
+          <Icon name='thumbs outline down' />
           {isComment ? 'Dislike' : null}
         </Comment.Action>
       </div>

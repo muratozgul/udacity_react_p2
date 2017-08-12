@@ -1,0 +1,9 @@
+@media only screen and (max-width: 768px) {
+  div.ui.input.margin-on-mobile {
+    margin: 10px 0px 0px;
+  }
+
+  button.ui.mini.fluid.margin-on-mobile {
+    margin: 10px 0px;
+  }
+}

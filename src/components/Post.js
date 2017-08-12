@@ -73,11 +73,11 @@ class Post extends Component {
     const {
       id, timestamp, title, body, author, category, voteScore, thumb
     } = this.props.post;
-    const showDimmer = id === this.props.delete.id;
+    const showDeleteConfirmation = id === this.props.delete.id;
 
     return (
-      <Dimmer.Dimmable as={Card} fluid blurring dimmed={showDimmer}>
-        <Dimmer active={showDimmer}>
+      <Dimmer.Dimmable as={Card} fluid blurring dimmed={showDeleteConfirmation}>
+        <Dimmer active={showDeleteConfirmation}>
           {this.renderDeleteConfirmation()}
         </Dimmer>
         <div style={{ position: 'absolute', right: '13px', top: '2px' }}>

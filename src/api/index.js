@@ -100,6 +100,38 @@ export const initializeAPI = (url = DEFAULT_SERVER_URL, options = {}) => {
     return votePost(commentId, 'downVote');
   };
 
+  API.createNewComment = (commentData) => {
+    const comment = {
+      id: uuid(),
+      timestamp: Date.now(),
+      body: commentData.body,
+      author: commentData.author,
+      parentId: commentData.parentId
+    };
+    const options = {
+      method: 'POST',
+      headers: { ...headers, 'content-type': 'application/json' },
+      body: JSON.stringify(comment)
+    };
+    return fetch(`${url}/comments`, options)
+      .then(res => res.json());
+  };
+
+  API.editComment = (commentData) => {
+    const { id, body } = commentData;
+    const options = {
+      method: 'PUT',
+      headers: { ...headers, 'content-type': 'application/json' },
+      body: JSON.stringify({ body })
+    };
+    return fetch(`${url}/comments/${id}`, options)
+      .then(res => res.json());
+  };
+
+  API.deleteComment = (commentId) => {
+    return fetch(`${url}/comments/${commentId}`, { method: 'DELETE', headers });
+  };
+
   Object.freeze(API);
 };
 
